@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from langchain_classic.chains import create_retrieval_chain
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
@@ -5,9 +6,13 @@ from langchain_community.document_loaders import PyPDFLoader,WebBaseLoader
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_ollama import ChatOllama
+from langchain_groq import ChatGroq
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from dotenv import load_dotenv
 
+load_dotenv()
+
+api_key = os.getenv("GROQ_API")
 
 # CONFIGURATION
 
@@ -16,7 +21,7 @@ DATA_DIR = PROJECT_DIR / "pdf_srcs"
 PERSIST_DIR = PROJECT_DIR / "db" / "chroma"
 COLLECTION_NAME = "pyassistant"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-LLM_MODEL = "gemma4:31b-cloud"
+LLM_MODEL = "openai/gpt-oss-120b"
 
 
 # PDF FILES
@@ -132,9 +137,10 @@ def create_rag_chain():
     
     # Ollama LLM
     
-    llm = ChatOllama(
+    llm = ChatGroq(
         model=LLM_MODEL,
         temperature=0,
+        groq_api_key=api_key
     )
 
     # RAG Prompt

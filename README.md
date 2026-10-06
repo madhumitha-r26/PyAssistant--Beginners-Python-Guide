@@ -1,98 +1,131 @@
 # PyAssistant
 
-PyAssistant is a beginner-friendly Python learning assistant built with Streamlit and Retrieval-Augmented Generation (RAG). It answers Python questions by searching through curated learning resources, official Python documentation, and programming examples, then responds with context-aware answers and code snippets.
+PyAssistant is a beginner-friendly Python learning assistant that uses a Retrieval-Augmented Generation (RAG) workflow to answer Python questions with context from curated learning materials and official documentation.
+
+It combines a Streamlit chat interface with a vector database, embeddings, and a Groq-powered language model to provide helpful explanations and Python code snippets for learners.
 
 ## Overview
 
-This project helps users:
+This project is designed to help students and beginners:
 
-- learn Python concepts from trusted sources
-- ask questions in plain English
-- get answers grounded in provided documents
-- generate Python code examples for common tasks
-- explore beginner and interview-focused Python topics
+- ask Python questions in plain English
+- receive answers grounded in curated educational content
+- review relevant examples from PDF and web resources
+- generate Python code snippets for common programming tasks
+- learn core concepts and interview-ready patterns in a guided format
 
-The app combines:
+## What the app does
 
-- a Streamlit chat interface
-- Chroma vector database for semantic retrieval
-- Hugging Face sentence embeddings
-- Llama/Ollama-based language model for answer generation
-- curated PDF and website content for Python learning
+PyAssistant loads a set of Python learning PDFs and documentation pages, splits them into chunks, stores them in a local Chroma vector database, and then retrieves the most relevant context for each user question.
 
-## Tech Stack
+The app then sends that retrieved context along with the prompt to a Groq LLM and returns an answer that is grounded in the project materials.
+
+## Tech stack
 
 - Python 3.13+
 - Streamlit
 - LangChain
 - Chroma
-- Hugging Face Embeddings
-- Ollama / local LLM
-- PyPDFLoader and WebBaseLoader
+- Hugging Face sentence-transformers embeddings
+- Groq API for LLM inference
+- PyPDF and web loaders for source material
+- dotenv environment configuration
 
-## Project Structure
+## Project structure
 
-- `main.py` – Streamlit app UI and chat flow
-- `rag_model.py` – document loading, chunking, embedding, vector retrieval, and LLM/RAG chain setup
-- `pdf_srcs/` – PDF learning resources used as context
-- `db/chroma/` – persisted Chroma vector database
-- `assets/` – app branding assets
+- `main.py` – Streamlit application entry point and chat UI
+- `rag_model.py` – document loading, chunking, vector store setup, retrieval, and RAG chain creation
+- `pdf_srcs/` – curated Python PDFs used as knowledge sources
+- `db/chroma/` – persistent Chroma database created automatically on first run
+- `assets/` – branding assets for the app interface
+- `requirements.txt` – Python dependencies
+- `pyproject.toml` – project metadata and dependency configuration
 
 ## Features
 
 - conversational Python tutoring
-- AI-generated code snippets
-- retrieval from curated documents and official Python docs
-- persistent vector store so the app can reuse indexed content
-- beginner-focused Q&A for Python programming and interview prep
+- context-aware answers from curated learning resources
+- code generation for common Python tasks
+- persistent vector database for faster reuse of indexed documents
+- beginner-focused learning flow for Python fundamentals and interview prep
+
+## Prerequisites
+
+Before running the project, make sure you have:
+
+- Python 3.13 or newer
+- a Groq API key
+- access to the internet for loading documentation pages
+- the PDF files in `pdf_srcs/`
 
 ## Setup
 
 1. Clone the repository.
-2. Create and activate a virtual environment.
+
+2. Create and activate a virtual environment:
+
+   ```bash
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   ```
+
 3. Install dependencies:
 
    ```bash
    pip install -r requirements.txt
    ```
 
-   or, if using uv:
+   Or with uv:
 
    ```bash
    uv sync
    ```
 
-4. Make sure Ollama is installed and running.
-5. Pull the model used by the app:
+4. Create a `.env` file in the project root with your Groq API key:
 
-   ```bash
-   ollama pull gemma4:31b-cloud
+   ```env
+   GROQ_API=your_groq_api_key_here
    ```
 
-6. Start the app:
+5. Confirm that the reference PDFs are present in `pdf_srcs/`.
 
-   ```bash
-   streamlit run main.py
-   ```
+## Running the app
+
+Start the Streamlit app:
+
+```bash
+streamlit run main.py
+```
+
+Then open the local URL shown in the terminal in your browser.
+
+## How it works
+
+On startup, the app checks whether the Chroma database already exists.
+
+- If the database is empty, it loads the configured PDFs and website content, splits them into chunks, and stores them in Chroma.
+- If the database already contains data, it reuses the indexed content instead of rebuilding it.
+
+When you ask a question, the app:
+
+1. retrieves the most relevant document chunks
+2. passes them to the retrieval pipeline
+3. sends the context and your prompt to the Groq model
+4. returns a context-aware answer along with Python code when needed
+
+## Example questions
+
+- "Explain list comprehensions in Python"
+- "Write a Python function to check for palindromes"
+- "What is the difference between a list and a tuple?"
+- "Show an example of dictionary iteration in Python"
 
 ## Notes
 
-- The project expects the Python learning PDFs located in the `pdf_srcs/` folder.
-- The app indexes these documents the first time it runs and stores them in `db/chroma`.
-- If the database is empty, it automatically creates the vector store based on the configured documents.
-- The project is designed as a local educational AI assistant and may require a machine with enough RAM and a working local model runtime.
-
-## Usage
-
-Open the Streamlit UI in your browser and ask questions such as:
-
-- "Explain Python list comprehensions"
-- "Write a Fibonacci function in Python"
-- "What is a dictionary in Python?"
-- "Show example code for string slicing"
-
-The assistant will retrieve relevant document chunks and generate a response grounded in those resources.
+- The project depends on the PDFs in `pdf_srcs/` and a valid `GROQ_API` value.
+- The vector database is stored in `db/chroma` and is reused across runs.
+- This project is intended for learning and experimentation, not for production deployment.
 
 ## License
 
-This project is currently for educational and personal use. Update this section if you plan to distribute it under a specific license.
+This project is currently intended for educational use. Add a formal license if you plan to share or distribute it publicly.
